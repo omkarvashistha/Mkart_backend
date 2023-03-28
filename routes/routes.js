@@ -1,6 +1,6 @@
 const express = require('express')
 const eKartRouter = express.Router()
-const eKartController = require('../Controller/mKartController')
+const eKartController = require('../Controller/mkartController')
 const cors = require('cors');
 const app = express();
 app.use(cors());

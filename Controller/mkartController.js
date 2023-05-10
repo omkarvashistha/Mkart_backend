@@ -403,7 +403,9 @@ exports.addToCart = async (req, res) => {
                     quantity: Number(req.body.quantity),
                     total: Number(cost) * Number(req.body.quantity) + Number(product.deliveryCharge),
                 }
-                const cartData = await eKartModel.cart.findOne({username: req.params.username })
+
+                const cartData = await eKartModel.cart.findOne({username: req.params.username });
+
                 if (cartData) { 
 
                     let isProductAlreadyPresent = false
@@ -424,15 +426,18 @@ exports.addToCart = async (req, res) => {
                     else {
                         cartData.items.push(productItem)
                         await cartData.save()
-                        helper.updateCart(user.username);
+                        //helper.updateCart(user.username);
                     }
                 }
+
                 else { // cart is not created yet for the user                    
                     const name = req.params.username
+                    console.log(productItem);
                     const totalPrice = (cost * productItem.quantity)
                     const totalDeliveryCharge = productItem.deliveryCharge
                     const grandTotal = productItem.total
-                    console.log(name,totalPrice,totalDeliveryCharge,grandTotal)
+
+                    //console.log(name,totalPrice,totalDeliveryCharge,grandTotal)
                     const test =  await eKartModel.cart.create({
                         username: name, 
                         totalPrice: totalPrice , 

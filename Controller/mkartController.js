@@ -287,10 +287,20 @@ exports.placeOrder = async(req,res) => {
 exports.viewCart = async(req,res) => {
     try {
         console.log(new Date())
-        const cart = await eKartModel.cart.find({username : req.params.username},{_id :0 ,_v : 0})
+        const cart = await eKartModel.cart.find({username : req.params.username},{_id :0 ,_v : 0});
         if(cart.length > 0) {
+
+            let subtotal = 0;
+
+            cart[0].items.forEach(cartItem => {
+                subtotal+=cartItem.total;
+            });
+
+            console.log(subtotal);
+
             res.status(200).json({
-                message : cart
+                message : cart,
+                total : subtotal
             })
         } else {
             res.status(400).json({
@@ -308,61 +318,91 @@ exports.modifyCart = async(req,res) => {
     try {
         const flag = req.body.flag;
         const name = req.params.username
+        
 
         if(flag === "update") {
 
-            const cartData = await eKartModel.cart.findOne({username: req.params.username })
-            let total = 0
-            for (const item of cartData.items) {
-                if (item.productName === req.body.productName) {
-                    total = req.body.quantity * item.cost + item.deliveryCharge                          
-                    break
+            const quantity = req.body.quantity;
+            if(quantity === 0) { // if quantity then delete the item from cart
+
+                const deletedDataResponse = await eKartModel.cart.updateOne({
+                    username : name,
+                },
+                {
+                    "$pull" : { // this will remove the particular product from the cart
+                        "items" : {
+                            'productName' : req.body.productName
+                        }
+                    }
+                })
+
+                if(deletedDataResponse!==null) {
+                    res.status(201).json({
+                        message : "Updated cart"
+                    })
+                } else {
+                    res.status(201).json({
+                        message : "Some Problem Occured"
+                    })
+                }
+
+            } else { // if quantity is more than zero then update to database
+                const cartData = await eKartModel.cart.findOne({username: req.params.username });
+                let total = 0
+                for (const item of cartData.items) {
+                    if (item.productName === req.body.productName) {
+                        total = req.body.quantity * item.cost + item.deliveryCharge                          
+                        break
+                    }
+                }
+
+                const updateDataResponse = await eKartModel.cart.updateOne({
+                    username : name,
+                    "items.productName" : req.body.productName
+                },
+                {
+                    "$set" : {
+                        "items.$.quantity" : req.body.quantity,
+                        "items.$.total" : total
+                    }
+                })
+
+                if(updateDataResponse !== null) {
+                    res.status(201).json({
+                        message : "Quantity updated"
+                    })
+                    helper.updateCart(name)
+                } else {
+                    res.status(201).json({
+                        message : "Some Problem Occured"
+                    })
                 }
             }
 
-
-
-            const updateDataResponse = await eKartModel.cart.updateOne({
-                username : name,
-                "items.productName" : req.body.productName
-            },
-            {
-                "$set" : {
-                    "items.$.quantity" : req.body.quantity,
-                    "items.$.total" : total
-                }
-            })
-
-            if(updateDataResponse !== null) {
-                res.status(201).json({
-                    message : "Quantity updated"
-                })
-                helper.updateCart(name)
-            } else {
-                res.status(201).json({
-                    message : "Some Problem Occured"
-                })
-            }
+            
         } 
 
         if(flag === "delete") {
-            console.log("here")
+            console.log("here");
+
             const deletedDataResponse = await eKartModel.cart.updateOne({
                 username : name,
-                "items.productName" : req.body.productName
             },
             {
-                "$set" : {
-                    "items.$.quantity" : 0,
-                    "items.$.total" : 0
+                "$pull" : { // this will remove the particular product from the cart
+                    "items" : {
+                        'productName' : req.body.productName
+                    }
                 }
             })
+
             console.log(deletedDataResponse)
+
             if(deletedDataResponse!==null) {
                 res.status(201).json({
                     message : "Deleted"
                 })
-                helper.updateCart(name)
+                //helper.updateCart(name)
             } else {
                 res.status(201).json({
                     message : "Some Problem Occured"
@@ -431,13 +471,15 @@ exports.addToCart = async (req, res) => {
                 }
 
                 else { // cart is not created yet for the user                    
-                    const name = req.params.username
+                    const name = req.params.username;
+
                     console.log(productItem);
-                    const totalPrice = (cost * productItem.quantity)
-                    const totalDeliveryCharge = productItem.deliveryCharge
-                    const grandTotal = productItem.total
+                    const totalPrice = (cost * productItem.quantity);
+                    const totalDeliveryCharge = productItem.deliveryCharge;
+                    const grandTotal = productItem.total;
 
                     //console.log(name,totalPrice,totalDeliveryCharge,grandTotal)
+
                     const test =  await eKartModel.cart.create({
                         username: name, 
                         totalPrice: totalPrice , 

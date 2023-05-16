@@ -303,7 +303,7 @@ exports.viewCart = async(req,res) => {
                 total : subtotal
             })
         } else {
-            res.status(400).json({
+            res.status(200).json({
                 message : "Cart is Empty"
             })
         }
@@ -422,7 +422,7 @@ exports.modifyCart = async(req,res) => {
 exports.addToCart = async (req, res) => {
     try {
         const user = await eKartModel.users.findOne({ username: req.params.username }, { _id: 0, __v: 0 });
-        let flag =false;
+        let flag = false;
         if (user) { // user is valid
             const product = await eKartModel.products.findOne({ productName: req.body.productName }, { _id: 0, __v: 0 })
             if (product) { // productname exists
@@ -455,13 +455,13 @@ exports.addToCart = async (req, res) => {
                             isProductAlreadyPresent = true
                             item.quantity += Number(req.body.quantity)
                             item.total = item.quantity * item.cost + item.deliveryCharge                          
-                            break
+                            break;
                         }
                     }
 
 
                     if (isProductAlreadyPresent) {
-                        flag = true
+                        flag = true;
                     }
                     else {
                         cartData.items.push(productItem)

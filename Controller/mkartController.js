@@ -316,6 +316,7 @@ exports.viewCart = async(req,res) => {
 
 exports.modifyCart = async(req,res) => {
     try {
+
         const flag = req.body.flag;
         const name = req.params.username
         
@@ -323,7 +324,8 @@ exports.modifyCart = async(req,res) => {
         if(flag === "update") {
 
             const quantity = req.body.quantity;
-            if(quantity === 0) { // if quantity then delete the item from cart
+            console.log(quantity);
+            if(quantity === 0) { // if quantity is 0 then delete the item from cart
 
                 const deletedDataResponse = await eKartModel.cart.updateOne({
                     username : name,

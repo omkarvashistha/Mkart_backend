@@ -373,7 +373,6 @@ exports.modifyCart = async(req,res) => {
                     res.status(201).json({
                         message : "Quantity updated"
                     })
-                    helper.updateCart(name)
                 } else {
                     res.status(201).json({
                         message : "Some Problem Occured"

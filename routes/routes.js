@@ -24,6 +24,7 @@ eKartRouter.post('/:username/update',eKartController.updatePassword)
 eKartRouter.post('/:username/addtocart',eKartController.addToCart)
 eKartRouter.post('/:username/modifycart',eKartController.modifyCart)
 eKartRouter.post('/:username/orders',eKartController.placeOrder)
+eKartRouter.post('/addReview',eKartController.addReview);
 
 /* PUT REQUESTS */
 

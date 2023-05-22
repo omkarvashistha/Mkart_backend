@@ -238,6 +238,38 @@ exports.getDeals = async(req,res) => {
     }
 }
 
+exports.addReview = async(req,res)=>{
+    try {
+        
+        const productInfo = await eKartModel.products.find({productName : req.body.productName});
+
+        if(productInfo) { // if product exists
+
+            const reviewObj = {
+                rating : req.body.rating,
+                reviewComments : req.body.comments
+            }
+
+            productInfo[0].avgRating.push(reviewObj);
+            await productInfo[0].save();
+            await helper.updateRating(req.body.productName);
+
+            res.status(200).json({
+                message : "review added"
+            });
+        } else {
+            res.json(400).json({
+                message : "Product does not exists"
+            })
+        }
+
+    } catch (error) {
+        res.status(400).json({
+            message : error.message
+        })
+    }
+}
+
 /* Order APIs */
 
 exports.placeOrder = async(req,res) => {

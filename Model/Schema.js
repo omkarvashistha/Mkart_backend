@@ -49,7 +49,7 @@ const products = new mongoose.Schema({
         type:Number,
     },
     rating:{
-        type:String,
+        type:Number,
     },
     description:{
         type:String,
@@ -64,19 +64,15 @@ const products = new mongoose.Schema({
     deliveryCharge:{
         type:Number,
     },
-
-    avgRating: {
-        reviews: [
-          {      
-            rating:{type: String},
+    category : {
+        type : String,
+    },
+    avgRating: [
+        {      
+            rating:{type: Number},
             reviewComments:{type:String}
-          },
-          {
-            rating:{type:String},
-            reviewComments:{type:String}
-          }
-        ]
-      }
+        },
+    ]
 },
 {
     timestamps: {
